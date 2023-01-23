@@ -11,4 +11,4 @@ class Profile(models.Model):
     weight = models.IntegerField()
     height = models.IntegerField()
     lbs_per_week = models.FloatField()
-    calorie_goal = models.IntegerField()
+    calorie_goal = models.IntegerField(default=2000)

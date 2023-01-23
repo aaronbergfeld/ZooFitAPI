@@ -18,7 +18,10 @@ from django.urls import path
 
 from .journal import views
 
+import rest_framework.authtoken.views as authtoken
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', views.create_user),
+    path('api-token-auth/', authtoken.obtain_auth_token)
 ]
