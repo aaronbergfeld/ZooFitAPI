@@ -43,8 +43,8 @@ def fetch_menus(request):
 
 
 @api_view(['GET'])
-def get_menu(request, location, day, month, year):
-    dishes = get_list_or_404(Dish, location=location, date__year=year, date__month=month, date__day=day)
+def get_menu(request, meal, location, day, month, year):
+    dishes = get_list_or_404(Dish, meal_name=meal, location=location, date__year=year, date__month=month, date__day=day)
     dish_serializer = DishSerializer(dishes, many=True)
     return Response(dish_serializer.data, status=status.HTTP_200_OK)
 
