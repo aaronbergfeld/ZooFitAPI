@@ -22,6 +22,8 @@ import rest_framework.authtoken.views as authtoken
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('fetch_menus/', views.fetch_menus),
+    path('menu/<location>/<year>/<month>/<day>/', views.get_menu),
     path('user/', views.create_user),
     path('api-token-auth/', authtoken.obtain_auth_token)
 ]
