@@ -19,7 +19,7 @@ class DishSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dish
         fields = [
-            'id'
+            'id',
             'location',
             'dish-name',
             'date',
