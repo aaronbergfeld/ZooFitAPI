@@ -19,7 +19,7 @@ def fetch_menus(request):
         4: 'Berkshire Dining Commons',
     }
     for location in range(1,5):
-        menu = dining.get_menu(1)
+        menu = dining.get_menu(location)
         if menu:
             for dish in menu:
                 dish['location'] = location_map[location]
@@ -34,6 +34,7 @@ def fetch_menus(request):
                 dish['protein'] = dish['protein'].magnitude
                 dish['ingredient-list'] = str(dish['ingredient-list'])
                 dish['allergens'] = str(dish['allergens'])
+                dish['serving-size'] = dish['serving-size'].lower()
                 dish_serializer = DishSerializer(data=dish)
                 if dish_serializer.is_valid():
                     dish_serializer.save()
