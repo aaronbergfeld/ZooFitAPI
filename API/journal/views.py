@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser
 from .serializers import *
+from .models import *
 from umass_toolkit import dining
 from django.shortcuts import get_list_or_404
 
@@ -60,3 +61,37 @@ def create_user(request):
         user.save()
         return Response(user_serializer.validated_data, status=status.HTTP_201_CREATED)
     return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def add_dishes_to_journal(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    journal = Journal.objects.get(user=request.user)
+    for id in request.data:
+        dish = Dish.objects.get(id=id)
+        jdi, created = Journal_Dish_Intermediary.objects.get_or_create(journal=journal, dish=dish) 
+        quantity = request.data[id]
+        jdi.quantity += quantity
+        jdi.save()
+        journal.calories += dish.calories * quantity
+        journal.calories_from_fat += dish.calories_from_fat * quantity
+        journal.total_fat += dish.total_fat * quantity
+        journal.sat_fat += dish.sat_fat * quantity
+        journal.trans_fat += dish.trans_fat * quantity
+        journal.cholesterol += dish.cholesterol * quantity
+        journal.sodium += dish.sodium * quantity
+        journal.total_carb += dish.total_carb * quantity
+        journal.dietary_fiber += dish.dietary_fiber * quantity
+        journal.sugars += dish.sugars * quantity
+        journal.protein += dish.protein * quantity
+        journal.save() 
+    return Response(status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_journal(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    journal, created = Journal.objects.get_or_create(user=request.user)
+    journal_serializer = JournalSerializer(journal)
+    return Response(journal_serializer.data, status=status.HTTP_200_OK)
+

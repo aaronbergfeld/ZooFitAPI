@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Dish, Profile
+from .models import *
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
@@ -54,4 +54,37 @@ class DishSerializer(serializers.ModelSerializer):
             'dietary-fiber': {'source': 'dietary_fiber'},
             'ingredient-list': {'source': 'ingredient_list'},
         }
+
+class Journal_Dish_Intermediary_Serializer(serializers.ModelSerializer):
+    dish = DishSerializer(read_only=True)
+
+    class Meta:
+        model = Journal_Dish_Intermediary
+        fields = [
+            'dish',
+            'quantity',
+        ]
+
+class JournalSerializer(serializers.ModelSerializer):
+    dishes = Journal_Dish_Intermediary_Serializer(many=True, read_only=True, source='journal_dish_intermediary')
+    
+    class Meta:
+        model = Journal
+        fields = [
+            'id',
+            'date',
+            'calorie_goal',
+            'calories',
+            'calories_from_fat',
+            'total_fat',
+            'sat_fat',
+            'trans_fat',
+            'cholesterol',
+            'sodium',
+            'total_carb',
+            'dietary_fiber',
+            'sugars',
+            'protein',
+            'dishes',
+        ]
         
