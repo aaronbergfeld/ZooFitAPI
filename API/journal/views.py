@@ -13,18 +13,20 @@ import datetime
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
-def fetch_menus(request):
+def fetch_menus(request, year, month, day):
     location_map = {
         1: 'Worcester Commons',
         2: 'Franklin Dining Commons',
         3: 'Hampshire Dining Commons',
         4: 'Berkshire Dining Commons',
     }
+    date = datetime.date(year, month, day)
     for location in range(1,5):
-        menu = dining.get_menu(location)
+        menu = dining.get_menu(location, date)
         if menu:
             for dish in menu:
                 dish['location'] = location_map[location]
+                dish['date'] = date
                 if dish['total-fat'] is not None:
                     dish['total-fat'] = dish['total-fat'].magnitude
                 if dish['sat-fat'] is not None:
@@ -67,13 +69,18 @@ def get_menu(request, meal, location, year, month, day):
 @api_view(['POST'])
 @csrf_exempt
 def create_user(request):
+    weight = request.data['profile'].pop('weight')
+    request.data['profile']['starting_weight'] = weight
+    request.data['profile']['weights'] = [{'weight': weight, 'date': datetime.date.today()}]
+    print(request.data)
     user_serializer = UserSerializer(data=request.data)
-    if user_serializer.is_valid():
-        user = user_serializer.save()
-        user.set_password(user.password)
-        user.save()
-        return Response(user_serializer.validated_data, status=status.HTTP_201_CREATED)
-    return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    user_serializer.is_valid(raise_exception=True)
+    user = user_serializer.save()
+    user.profile.calorie_goal = calculate_calorie_goal(user)
+    user.profile.save()
+    user.set_password(user.password)
+    user.save()
+    return Response(user_serializer.validated_data, status=status.HTTP_201_CREATED)
 
 @api_view(['POST', 'GET', 'DELETE'])
 def journal(request, year, month, day):
@@ -132,3 +139,54 @@ def journal(request, year, month, day):
         journal.save()
         return Response(status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def is_username_available(request, username):
+    data = {
+        'is_taken': User.objects.filter(username__iexact=username).exists()
+    }
+    return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_profile(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    user_serializer = UserSerializer(request.user)
+    return Response(user_serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def log_weight(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    weight = request.data['weight']
+    date = request.data['date']
+    request.user.profile.weights.filter(date=date).delete()
+    request.user.profile.weights.create(weight=weight, date=date)
+    if request.user.profile.weights.filter(date__gt=date).count() == 0:
+        request.user.profile.calorie_goal = calculate_calorie_goal(request.user)
+        request.user.profile.save()
+    return Response(status=status.HTTP_200_OK)
+
+katch_mcardle_multiplier = {
+    'sedentary': 1.2,
+    'light': 1.375,
+    'moderate': 1.55,
+    'heavy': 1.725,
+    'extreme': 1.9
+}
+
+def calculate_calorie_goal(user):
+    # mifflin-st jeor formula * katch-mcardle multiplier
+    weight = user.profile.weights.latest('date').weight * 0.453592
+    height = user.profile.height * 2.54
+    age = user.profile.age
+    sex = user.profile.sex
+    activity_level = user.profile.activity_level
+    lbs_per_week = float(user.profile.lbs_per_week)
+    bmr = 10 * weight + 6.25 * height - 5 * age
+    if sex == 'male':
+        bmr += 5
+    else:
+        bmr -= 161
+    return int(float(bmr * katch_mcardle_multiplier[activity_level]) - float(500 * lbs_per_week))
+    

@@ -3,10 +3,17 @@ from .models import *
 from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 
+class WeightSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Weight
+        fields = ['id', 'weight', 'date']
+
 class ProfileSerializer(WritableNestedModelSerializer):
+    weights = WeightSerializer(many=True)
+    
     class Meta:
         model = Profile
-        fields = ['age', 'weight', 'height', 'lbs_per_week', 'calorie_goal']
+        fields = ['age', 'sex', 'starting_weight', 'goal_weight', 'weights', 'height', 'lbs_per_week', 'activity_level', 'calorie_goal']
 
 class UserSerializer(WritableNestedModelSerializer):
     profile = ProfileSerializer()

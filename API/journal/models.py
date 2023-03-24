@@ -11,19 +11,23 @@ class Journal(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField()
-    weight = models.IntegerField()
+    sex = models.CharField(max_length=6)
+    activity_level = models.CharField(max_length=50)
+    starting_weight = models.IntegerField()
+    goal_weight = models.IntegerField()
+    weights = models.ManyToManyField('Weight', related_name='weights', blank=True, null=True)
     height = models.IntegerField()
     lbs_per_week = models.DecimalField(decimal_places=1, max_digits=3)
     calorie_goal = models.IntegerField(default=2000)
 
 class Dish(models.Model):
     dish_name = models.CharField(max_length=100)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
     location = models.CharField(max_length=100)
     meal_name = models.CharField(max_length=50)
     category_name = models.CharField(max_length=50)
     serving_size = models.CharField(max_length=50)
-    calories = models.IntegerField()
+    calories = models.IntegerField(null=True, default=0)
     calories_from_fat = models.IntegerField(null=True, default=0)
     total_fat = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
     sat_fat = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
@@ -58,6 +62,13 @@ class Journal_Dish_Intermediary(models.Model):
     journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='journal_dish_intermediary')
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
+
+class Weight(models.Model):
+    date = models.DateField()
+    weight = models.IntegerField()   
+
+    class Meta:
+        ordering = ['date']
     
     
     

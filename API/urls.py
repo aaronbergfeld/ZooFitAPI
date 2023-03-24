@@ -23,8 +23,11 @@ import rest_framework.authtoken.views as authtoken
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/<meal>/<location>/<year>/<month>/<day>/', views.get_menu),
-    path('fetch_menus/', views.fetch_menus),
+    path('fetch_menus/<int:year>/<int:month>/<int:day>/', views.fetch_menus),
     path('user/', views.create_user),
     path('api-token-auth/', authtoken.obtain_auth_token),
     path('journal/<int:year>/<int:month>/<int:day>/', views.journal),
+    path('is_username_available/<username>/', views.is_username_available),
+    path('profile/', views.get_profile),
+    path('log_weight/', views.log_weight),
 ]
