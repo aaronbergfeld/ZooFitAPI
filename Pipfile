@@ -11,6 +11,7 @@ pint = "*"
 setuptools = "*"
 requests = "*"
 bs4 = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
