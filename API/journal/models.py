@@ -33,7 +33,7 @@ class Dish(models.Model):
     sat_fat = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
     trans_fat = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
     cholesterol = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
-    sodium = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
+    sodium = models.DecimalField(null=True, decimal_places=1, max_digits=8, default=0)
     total_carb = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
     dietary_fiber = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)
     sugars = models.DecimalField(null=True, decimal_places=1, max_digits=6, default=0)

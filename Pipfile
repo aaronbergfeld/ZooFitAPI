@@ -12,6 +12,7 @@ setuptools = "*"
 requests = "*"
 bs4 = "*"
 mysqlclient = "*"
+boto3 = "*"
 
 [dev-packages]
 
