@@ -190,3 +190,14 @@ def calculate_calorie_goal(user):
         bmr -= 161
     return int(float(bmr * katch_mcardle_multiplier[activity_level]) - float(500 * lbs_per_week))
     
+@api_view(["POST"])
+def update_goals(request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    user = request.user
+    user.profile.lbs_per_week = request.data['lbs_per_week']
+    user.profile.activity_level = request.data['activity_level']
+    user.profile.goal_weight = request.data['goal_weight']
+    user.profile.calorie_goal = calculate_calorie_goal(user)
+    user.profile.save()
+    return Response(status=status.HTTP_200_OK)

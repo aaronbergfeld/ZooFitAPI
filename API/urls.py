@@ -30,4 +30,5 @@ urlpatterns = [
     path('is_username_available/<username>/', views.is_username_available),
     path('profile/', views.get_profile),
     path('log_weight/', views.log_weight),
+    path('update_goals/', views.update_goals),
 ]
